@@ -181,7 +181,7 @@ jobs:
           #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707993978&amp;P2=404&amp;P3=2&amp;P4=D16XFPezqLzF2X4AfETfyre%2b6L%2fPA%2bgqRJ9pu4XIUTjhnZHbIl9vSuZoX8%2bEk5gWcrviP80%2bMZ8hXt22yMig%2bA%3d%3d"
           #link = "https://cybervision.site/downloads/MicrosoftCorporationII.WindowsSubsystemForAndroid_2305.40000.4.0_neutral_~_8wekyb3d8bbwe.Msixbundle"
           #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707997768&P2=404&P3=2&P4=FvGUeGBoBbyMfzC7eSfSJHcPH1M3h%2flxWcVndGrx24oQA2mKUkxTiVYie59s52cmxgpNNAL5YLutCI6TEuW7uQ%3d%3d"
-          link = "https://drive.usercontent.google.com/download?id=1L2d7qqDPFuE2YK10z68AgA_kqBAq4WWV&export=download&authuser=0&confirm=t&uuid=7f6fbf23-a05e-4369-a984-63e86412d414&at=APZUnTU_Kbt2KCMeHgxX4MAoAS4h%3A1707971340979"
+          link = "https://drive.usercontent.google.com/download?id=1L2d7qqDPFuE2YK10z68AgA_kqBAq4WWV&export=download&authuser=0&confirm=t&uuid=069252c9-b18e-4173-83c4-57ec115d3de6&at=APZUnTX0o99_cZrQJX9BGN-BEdtF%3A1707973276828"
           
           print(f"downloading link: {link}", flush=True)
           out_file = "wsa.zip"
@@ -232,7 +232,8 @@ jobs:
           import json
           import requests
 
-          magisk_apk = """${{ github.event.inputs.magisk_apk }}"""
+          #magisk_apk = """${{ github.event.inputs.magisk_apk }}"""
+          magisk_apk = "canary"
           
           if not magisk_apk:
               magisk_apk = "26.1"
