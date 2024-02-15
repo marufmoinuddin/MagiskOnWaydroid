@@ -153,22 +153,25 @@ jobs:
           
           html = BeautifulSoup(res.content, "lxml")
 
-          a = html.find("a", string=re.compile(f"Microsoft\.UI\.Xaml\..*_{arch}_.*\.appx"))
-          link = a["href"]
+          #a = html.find("a", string=re.compile(f"Microsoft\.UI\.Xaml\..*_{arch}_.*\.appx"))
+          #link = a["href"]
+          link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/251bbb12-dbfc-4820-b0ff-c4dfa70ffb09?P1=1707966294&amp;P2=404&amp;P3=2&amp;P4=Rc4wKoReCGAfObxtd3PsE0bWxKV7f3bua%2fi2BoaR%2bILz3ogfS36L9XT%2bTFY%2fHr5FaoVoVeYtpoQm4H5dmb%2ffsw%3d%3d"
           print(f"downloading link: {link}", flush=True)
           out_file = "xaml.appx"
           if not os.path.isfile(out_file):
               urllib.request.urlretrieve(link, out_file)
 
-          a = html.find("a", string=re.compile(f"Microsoft\.VCLibs\..*_{arch}_.*\.appx"))
-          link = a["href"]
+          #a = html.find("a", string=re.compile(f"Microsoft\.VCLibs\..*_{arch}_.*\.appx"))
+          #link = a["href"]
+          link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/986a8270-404c-4470-871d-5c4090dcaa79?P1=1707966338&amp;P2=404&amp;P3=2&amp;P4=GklG3NZN%2fe1jz9NFKWo7u87e0%2fAtfcCJi2v%2fz6zk4m9ttTazdF%2bMEjX0iubNspn8lodR52RNZdoVeBhfM8aiQQ%3d%3d"
           print(f"downloading link: {link}", flush=True)
           out_file = "vclibs.appx"
           if not os.path.isfile(out_file):
               urllib.request.urlretrieve(link, out_file)
 
-          a = html.find("a", string=re.compile("MicrosoftCorporationII\.WindowsSubsystemForAndroid_.*\.msixbundle"))
-          link = a["href"]
+          #a = html.find("a", string=re.compile("MicrosoftCorporationII\.WindowsSubsystemForAndroid_.*\.msixbundle"))
+          #link = a["href"]
+          link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707993978&amp;P2=404&amp;P3=2&amp;P4=D16XFPezqLzF2X4AfETfyre%2b6L%2fPA%2bgqRJ9pu4XIUTjhnZHbIl9vSuZoX8%2bEk5gWcrviP80%2bMZ8hXt22yMig%2bA%3d%3d" rel="noreferrer">MicrosoftCorporationII.WindowsSubsystemForAndroid_2305.40000.4.0_neutral_~_8wekyb3d8bbwe.msixbundle"
           print(f"downloading link: {link}", flush=True)
           out_file = "wsa.zip"
           if not os.path.isfile(out_file):
