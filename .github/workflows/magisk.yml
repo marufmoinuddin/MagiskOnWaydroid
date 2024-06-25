@@ -179,9 +179,9 @@ jobs:
           a = html.find("a", string=re.compile("MicrosoftCorporationII\.WindowsSubsystemForAndroid_.*\.msixbundle"))
           #link = a["href"]
           #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707993978&amp;P2=404&amp;P3=2&amp;P4=D16XFPezqLzF2X4AfETfyre%2b6L%2fPA%2bgqRJ9pu4XIUTjhnZHbIl9vSuZoX8%2bEk5gWcrviP80%2bMZ8hXt22yMig%2bA%3d%3d"
-          link = "https://cybervision.site/downloads/MicrosoftCorporationII.WindowsSubsystemForAndroid_2305.40000.4.0_neutral_~_8wekyb3d8bbwe.Msixbundle"
+          #link = "https://cybervision.site/downloads/MicrosoftCorporationII.WindowsSubsystemForAndroid_2305.40000.4.0_neutral_~_8wekyb3d8bbwe.Msixbundle"
           #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707997768&P2=404&P3=2&P4=FvGUeGBoBbyMfzC7eSfSJHcPH1M3h%2flxWcVndGrx24oQA2mKUkxTiVYie59s52cmxgpNNAL5YLutCI6TEuW7uQ%3d%3d"
-          #link = "https://drive.usercontent.google.com/download?id=1L2d7qqDPFuE2YK10z68AgA_kqBAq4WWV&export=download&authuser=0&confirm=t&uuid=069252c9-b18e-4173-83c4-57ec115d3de6&at=APZUnTX0o99_cZrQJX9BGN-BEdtF%3A1707973276828"
+          link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/9f21fa47-fe2c-4f89-804e-e2b697f0bb14?P1=1719340410&P2=404&P3=2&P4=OTesXgBPZKsnJHCXiNvy4ywPyhTIY8nR2ng5Pz0AwLVNZujLvloR7vSifR9HAjoz8XNA5noIwp%2bnJ7BRD1XGHw%3d%3d"
           
           print(f"downloading link: {link}", flush=True)
           out_file = "wsa.zip"
