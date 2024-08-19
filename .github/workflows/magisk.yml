@@ -337,7 +337,7 @@ jobs:
               urllib.request.urlretrieve(link, out_file)
           print("done", flush=True)
       - name: Replace system and vendor for architecture
-        shell: bash
+        
         run: |
           # Fetch and process JSON data for vendor
           VENDOR_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/HALIUM_11.json")
@@ -372,8 +372,7 @@ jobs:
           7z x system.zip -o${{ matrix.arch }}/
           7z x vendor.zip -o${{ matrix.arch }}/
       - name: Extract GApps and expand images
-        if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}
-        shell: bash
+        if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}        
         run: |
           mkdir gapps
           unzip -p gapps.zip {Core,GApps}/'*.lz' | tar --lzip -C gapps -xvf - -i --strip-components=2 --exclude='setupwizardtablet-x86_64' --exclude='packageinstallergoogle-all' --exclude='speech-common' --exclude='markup-lib-arm' --exclude='markup-lib-arm64' --exclude='markup-all' --exclude='setupwizarddefault-x86_64' --exclude='pixellauncher-all' --exclude='pixellauncher-common'
@@ -400,8 +399,7 @@ jobs:
           qemu-img convert -O raw ${{ matrix.arch }}/userdata.vhdx userdata.img
           sudo mount -o loop userdata.img userdata
       - name: Integrate Magisk
-        if: ${{ github.event.inputs.root_sol == 'magisk' || github.event.inputs.root_sol == '' }}
-        shell: bash
+        if: ${{ github.event.inputs.root_sol == 'magisk' || github.event.inputs.root_sol == '' }}        
         run: |
           mkdir linker
           mkdir linker/x86_64
@@ -496,8 +494,7 @@ jobs:
           done
 
           echo -e "Integrate Magisk done\n"
-      - name: Remove FOSS Apps
-        shell: bash
+      - name: Remove FOSS Apps        
         run: |
           sudo rm -rf system/system/app/com.google.android.gsf
           sudo rm -rf system/system/app/com.aurora.adroid
@@ -602,7 +599,7 @@ jobs:
           for sec, prop in {"system": "system/system/build.prop", "product": "system/product/build.prop", "system_ext": "system/system_ext/build.prop", "vendor": "system/vendor/build.prop", "odm": "system/vendor/odm/etc/build.prop"}.items():
               fix_prop(sec, prop)
       - name: Umount images
-        shell: bash
+        
         run: |
           sudo umount system/vendor
           sudo umount -l system/product
@@ -722,8 +719,7 @@ jobs:
           EOF
           shopt -s extglob
           sudo rm -rf -- ${{ matrix.arch }}/!(system.img|vendor.img)
-      - name: Generate artifact name
-        shell: bash
+      - name: Generate artifact name        
         run: |
           variant="${{ matrix.gapps_variant }}"
           root="${{ github.event.inputs.root_sol }}"
