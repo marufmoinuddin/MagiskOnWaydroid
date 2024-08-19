@@ -243,8 +243,8 @@ jobs:
           import json
           import requests
 
-          #magisk_apk = """${{ github.event.inputs.magisk_apk }}"""
-          magisk_apk = "canary"
+          magisk_apk = """${{ github.event.inputs.magisk_apk }}"""
+          #magisk_apk = "canary"
           
           if not magisk_apk:
               magisk_apk = "26.4"
