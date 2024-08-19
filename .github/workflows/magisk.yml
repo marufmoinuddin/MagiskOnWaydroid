@@ -339,27 +339,35 @@ jobs:
       - name: Replace system and vendor for architecture
         
         run: |
-          # Fetch and process JSON data for vendor
-          VENDOR_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/HALIUM_11.json")
-          if echo "$VENDOR_JSON" | jq . >/dev/null 2>&1; then
-              LATEST_VENDOR_URL=$(echo "$VENDOR_JSON" |
-                                  jq -r '.response[] | select(.romtype == "HALIUM_11" and (.filename | contains("vendor"))) | .url' | head -n 1)
-          else
-              echo "Failed to parse vendor JSON"
+          # Map matrix.arch to the correct architecture suffix
+          ARCH_SUFFIX=""
+          case ${{ matrix.arch }} in
+              x64)
+              ARCH_SUFFIX="x86_64"
+              ;;
+              arm64)
+              ARCH_SUFFIX="arm64"
+              ;;
+              *)
+              echo "Unsupported architecture: ${{ matrix.arch }}"
               exit 1
-          fi
+              ;;
+          esac
+          
+          # Debugging: Print the architecture suffix
+          echo "Using architecture suffix: $ARCH_SUFFIX"
+          
+          # Fetch and process JSON data for vendor
+          VENDOR_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${ARCH_SUFFIX}/HALIUM_11.json")
+          LATEST_VENDOR_URL=$(echo "$VENDOR_JSON" |
+                              jq -r '.response[] | select(.romtype == "HALIUM_11" and (.filename | contains("vendor"))) | .url' | head -n 1)
           
           # Fetch and process JSON data for system
-          SYSTEM_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${{ matrix.arch }}/VANILLA.json")
-          if echo "$SYSTEM_JSON" | jq . >/dev/null 2>&1; then
-              LATEST_SYSTEM_URL=$(echo "$SYSTEM_JSON" |
-                                  jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
-          else
-              echo "Failed to parse system JSON"
-              exit 1
-          fi
+          SYSTEM_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${ARCH_SUFFIX}/VANILLA.json")
+          LATEST_SYSTEM_URL=$(echo "$SYSTEM_JSON" |
+                              jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
           
-          # Debug outputs
+          # Debugging: Print the URLs
           echo "LATEST_VENDOR_URL: $LATEST_VENDOR_URL"
           echo "LATEST_SYSTEM_URL: $LATEST_SYSTEM_URL"
           
