@@ -339,12 +339,28 @@ jobs:
       - name: Replace system and vendor for architecture
         run: |
           # Fetch and process JSON data for vendor
-          LATEST_VENDOR_URL=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/HALIUM_11.json" |
-                              jq -r '.response[] | select(.romtype == "HALIUM_11" and (.filename | contains("vendor"))) | .url' | head -n 1)
+          VENDOR_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/HALIUM_11.json")
+          if echo "$VENDOR_JSON" | jq . >/dev/null 2>&1; then
+              LATEST_VENDOR_URL=$(echo "$VENDOR_JSON" |
+                                  jq -r '.response[] | select(.romtype == "HALIUM_11" and (.filename | contains("vendor"))) | .url' | head -n 1)
+          else
+              echo "Failed to parse vendor JSON"
+              exit 1
+          fi
           
           # Fetch and process JSON data for system
-          LATEST_SYSTEM_URL=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${{ matrix.arch }}/VANILLA.json" |
-                              jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
+          SYSTEM_JSON=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${{ matrix.arch }}/VANILLA.json")
+          if echo "$SYSTEM_JSON" | jq . >/dev/null 2>&1; then
+              LATEST_SYSTEM_URL=$(echo "$SYSTEM_JSON" |
+                                  jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
+          else
+              echo "Failed to parse system JSON"
+              exit 1
+          fi
+          
+          # Debug outputs
+          echo "LATEST_VENDOR_URL: $LATEST_VENDOR_URL"
+          echo "LATEST_SYSTEM_URL: $LATEST_SYSTEM_URL"
           
           # Remove old images
           rm -rf ${{ matrix.arch }}/system.img ${{ matrix.arch }}/vendor.img
