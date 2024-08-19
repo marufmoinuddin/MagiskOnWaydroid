@@ -338,26 +338,20 @@ jobs:
           print("done", flush=True)
       - name: Replace system and vendor for architecture
         run: |
-          # Fetch JSON data for vendor
-          vendor_json=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/MAINLINE.json")
-      
-          # Extract the latest vendor URL
-          LATEST_VENDOR_URL=$(echo "$vendor_json" | jq -r '.response[] | select(.romtype == "MAINLINE" and (.filename | contains("vendor"))) | .url' | head -n 1)
-      
-          # Fetch JSON data for system
-          system_json=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${{ matrix.arch }}/VANILLA.json")
-      
-          # Extract the latest system URL
-          LATEST_SYSTEM_URL=$(echo "$system_json" | jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
-      
+          # Fetch and process JSON data for vendor
+          LATEST_VENDOR_URL=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_${{ matrix.arch }}/HALIUM_11.json" |
+                              jq -r '.response[] | select(.romtype == "HALIUM_11" and (.filename | contains("vendor"))) | .url' | head -n 1)
+          
+          # Fetch and process JSON data for system
+          LATEST_SYSTEM_URL=$(curl -s "https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_${{ matrix.arch }}/VANILLA.json" |
+                              jq -r '.response[] | select(.romtype == "VANILLA" and (.filename | contains("system"))) | .url' | head -n 1)
+          
           # Remove old images
           rm -rf ${{ matrix.arch }}/system.img ${{ matrix.arch }}/vendor.img
-      
-          # Download the latest system and vendor files
+          
+          # Download and extract the latest system and vendor files
           wget -q "$LATEST_SYSTEM_URL" -O system.zip
           wget -q "$LATEST_VENDOR_URL" -O vendor.zip
-      
-          # Extract the downloaded files
           7z x system.zip -o${{ matrix.arch }}/
           7z x vendor.zip -o${{ matrix.arch }}/
       - name: Extract GApps and expand images
@@ -392,10 +386,10 @@ jobs:
         run: |
           mkdir linker
           mkdir linker/x86_64
-          wget -q https://raw.githubusercontent.com/pagkly/MagiskOn/main/linker/x86_64/libc.so -O linker/x86_64/libc.so
-          wget -q https://raw.githubusercontent.com/pagkly/MagiskOn/main/linker/x86_64/libdl.so -O linker/x86_64/libdl.so
-          wget -q https://raw.githubusercontent.com/pagkly/MagiskOn/main/linker/x86_64/libm.so -O linker/x86_64/libm.so
-          wget -q https://raw.githubusercontent.com/pagkly/MagiskOn/main/linker/x86_64/linker64 -O linker/x86_64/linker64
+          wget -q https://raw.githubusercontent.com/marufmoinuddin/MagiskOnWaydroid/main/linker/x86_64/libc.so -O linker/x86_64/libc.so
+          wget -q https://raw.githubusercontent.com/marufmoinuddin/MagiskOnWaydroid/main/linker/x86_64/libdl.so -O linker/x86_64/libdl.so
+          wget -q https://raw.githubusercontent.com/marufmoinuddin/MagiskOnWaydroid/main/linker/x86_64/libm.so -O linker/x86_64/libm.so
+          wget -q https://raw.githubusercontent.com/marufmoinuddin/MagiskOnWaydroid/main/linker/x86_64/linker64 -O linker/x86_64/linker64
           
           sudo chmod +x "linker/x86_64/linker64" || abort
           sudo patchelf --set-interpreter "linker/x86_64/linker64" "magisk/magiskpolicy" || abort
