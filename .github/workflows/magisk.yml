@@ -140,12 +140,17 @@ jobs:
           import zipfile
           import os
           import urllib.request
+          import warnings
+          from requests.packages.urllib3.exceptions import InsecureRequestWarning
           
-          arch = "${{ matrix.arch }}"
+          # Suppress InsecureRequestWarning
+          warnings.simplefilter('ignore', InsecureRequestWarning)
+          
+          arch = "x64"
           release_type = "WIS"
           
           def download_file(url, filename):
-              """ Download a file from a URL if it does not already exist. """
+              """Download a file from a URL if it does not already exist."""
               if not os.path.isfile(filename):
                   print(f"Downloading link: {url}", flush=True)
                   urllib.request.urlretrieve(url, filename)
@@ -196,11 +201,11 @@ jobs:
                                   zip.extract(f)
                                   ver_no = zip_name.split("_")
                                   ver = ver_no[1]
-                                  with open(os.environ['GITHUB_ENV'], 'a') as g:
+                                  with open(os.environ.get('GITHUB_ENV', '/dev/null'), 'a') as g:
                                       g.write(f'WSA_VER={ver}\n')
                                   rel = ver_no[3].split(".")
                                   rell = str(rel[0])
-                                  with open(os.environ['GITHUB_ENV'], 'a') as g:
+                                  with open(os.environ.get('GITHUB_ENV', '/dev/null'), 'a') as g:
                                       g.write(f'WSA_REL={rell}\n')
                           if 'language' in f.filename.lower() or 'scale' in f.filename.lower():
                               name = f.filename.split("-", 1)[1].split(".")[0]
@@ -227,6 +232,7 @@ jobs:
                   exit(1)
           
           print("Done", flush=True)
+
 
       - name: Download Magisk
         shell: python
