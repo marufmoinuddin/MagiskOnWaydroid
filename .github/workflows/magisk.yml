@@ -140,60 +140,54 @@ jobs:
           import zipfile
           import os
           import urllib.request
-
+          
           arch = "${{ matrix.arch }}"
-
-          #release_type_map = {"retail": "Retail", "release preview": "RP", "insider slow": "WIS", "insider fast": "WIF"}
-          #release_type_map = "WIS"
-          #release_type = release_type_map["${{ matrix.release_type }}"] if "${{ matrix.release_type }}" != "" else "Retail"	
           release_type = "WIS"
-          res = requests.post("https://store.rg-adguard.net/api/GetFiles", f"type=CategoryId&url=858014f3-3934-4abe-8078-4aa193e74ca8&ring={release_type}&lang=en-US", headers={	
-              "content-type": "application/x-www-form-urlencoded"	
-          }, verify=False) # source site has expired cert
           
+          # Fetch download links from the API
+          res = requests.post(
+              "https://store.rg-adguard.net/api/GetFiles",
+              data=f"type=CategoryId&url=858014f3-3934-4abe-8078-4aa193e74ca8&ring={release_type}&lang=en-US",
+              headers={"content-type": "application/x-www-form-urlencoded"},
+              verify=False  # Source site has expired cert
+          )
           html = BeautifulSoup(res.content, "lxml")
-
+          
+          # Find and download the Microsoft.UI.Xaml appx file
           a = html.find("a", string=re.compile(f"Microsoft\.UI\.Xaml\..*_x64_.*\.appx"))
-          #link = a["href"]
-          #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/251bbb12-dbfc-4820-b0ff-c4dfa70ffb09?P1=1707966294&amp;P2=404&amp;P3=2&amp;P4=Rc4wKoReCGAfObxtd3PsE0bWxKV7f3bua%2fi2BoaR%2bILz3ogfS36L9XT%2bTFY%2fHr5FaoVoVeYtpoQm4H5dmb%2ffsw%3d%3d"
-          link = "https://cybervision.site/downloads/Microsoft.UI.Xaml.2.8_8.2310.30001.0_x64__8wekyb3d8bbwe.Appx"
-          #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/251bbb12-dbfc-4820-b0ff-c4dfa70ffb09?P1=1707970080&P2=404&P3=2&P4=a000JnQVLx52qxsVAXQT0rm%2b%2bPHEGSNSBL0ZXkFfVBWIla2cV4V66z2IeNg4OuwLrxM2gcGqQfCp1Zrk7JSXmg%3d%3d"
-          #link = "https://drive.google.com/uc?export=download&id=1lmB3__Il3HtdSoCABgG6MvuJKZsF3lS_"
-          print(f"downloading link: {link}", flush=True)
-          out_file = "xaml.appx"
-          if not os.path.isfile(out_file):
-              urllib.request.urlretrieve(link, out_file)
-
+          if a:
+              link = a["href"]
+              print(f"Downloading link: {link}", flush=True)
+              out_file = "xaml.appx"
+              if not os.path.isfile(out_file):
+                  urllib.request.urlretrieve(link, out_file)
+          
+          # Find and download the Microsoft.VCLibs appx file
           a = html.find("a", string=re.compile(f"Microsoft\.VCLibs\..*_x64_.*\.appx"))
-          #link = a["href"]
-          #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/986a8270-404c-4470-871d-5c4090dcaa79?P1=1707966338&amp;P2=404&amp;P3=2&amp;P4=GklG3NZN%2fe1jz9NFKWo7u87e0%2fAtfcCJi2v%2fz6zk4m9ttTazdF%2bMEjX0iubNspn8lodR52RNZdoVeBhfM8aiQQ%3d%3d"
-          link = "https://cybervision.site/downloads/Microsoft.VCLibs.140.00_14.0.32530.0_x64__8wekyb3d8bbwe.Appx"
-          #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/28edaebf-8019-4844-ba32-8ab019bc9391?P1=1707970000&P2=404&P3=2&P4=L9MoQE009t3%2b4nkzPQrI7w0Rosu7a%2b05Iz5kLpIB5yUmYkGh%2b8IGirLlWZ%2bEd9z6qpNTWgstagr7C%2bwGEvW%2bFQ%3d%3d"
-          #link = "https://drive.google.com/uc?export=download&id=1e7Cl5uWh05Y-M82D2yNmnVIKFS9TxNf3"
+          if a:
+              link = a["href"]
+              print(f"Downloading link: {link}", flush=True)
+              out_file = "vclibs.appx"
+              if not os.path.isfile(out_file):
+                  urllib.request.urlretrieve(link, out_file)
           
-          print(f"downloading link: {link}", flush=True)
-          out_file = "vclibs.appx"
-          if not os.path.isfile(out_file):
-              urllib.request.urlretrieve(link, out_file)
-
+          # Find and download the Windows Subsystem for Android msixbundle file
           a = html.find("a", string=re.compile("MicrosoftCorporationII\.WindowsSubsystemForAndroid_.*\.msixbundle"))
-          #link = a["href"]
-          #link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/c7e4a2d1-eec9-41f7-9c20-04394821d8da?P1=1707993978&amp;P2=404&amp;P3=2&amp;P4=D16XFPezqLzF2X4AfETfyre%2b6L%2fPA%2bgqRJ9pu4XIUTjhnZHbIl9vSuZoX8%2bEk5gWcrviP80%2bMZ8hXt22yMig%2bA%3d%3d"
-          #link = "https://cybervision.site/downloads/MicrosoftCorporationII.WindowsSubsystemForAndroid_2305.40000.4.0_neutral_~_8wekyb3d8bbwe.Msixbundle"
-          link = "http://tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/9f21fa47-fe2c-4f89-804e-e2b697f0bb14?P1=1719404542&P2=404&P3=2&P4=ez53BJzSqa37STN1aZs7rRw%2f8LlZKCp%2b7pqLJiKU5fwb%2fR%2ftS%2fqhj1ct12F4fZ%2bQgIOqrdXhU7z7g3O526F%2buw%3d%3d"
+          if a:
+              link = a["href"]
+              print(f"Downloading link: {link}", flush=True)
+              out_file = "wsa.zip"
+              if not os.path.isfile(out_file):
+                  urllib.request.urlretrieve(link, out_file)
           
-          print(f"downloading link: {link}", flush=True)
-          out_file = "wsa.zip"
-          if not os.path.isfile(out_file):
-              urllib.request.urlretrieve(link, out_file)
-
+          # Unzip the downloaded WSA package
           zip_name = ""
           with zipfile.ZipFile(out_file) as zip:
               for f in zip.filelist:
                   if arch in f.filename.lower():
                       zip_name = f.filename
                       if not os.path.isfile(zip_name):
-                          print(f"unzipping to {zip_name}", flush=True)
+                          print(f"Unzipping to {zip_name}", flush=True)
                           zip.extract(f)
                           ver_no = zip_name.split("_")
                           ver = ver_no[1]
@@ -211,17 +205,19 @@ jobs:
                               if g.filename == 'resources.pri':
                                   g.filename = f'{name}.pri'
                                   l.extract(g, 'pri')
-                                  print(f"extract resource pack {g.filename}")
+                                  print(f"Extracted resource pack {g.filename}")
                               elif g.filename == 'AppxManifest.xml':
                                   g.filename = f'{name}.xml'
                                   l.extract(g, 'xml')
-
-          with zipfile.ZipFile(zip_name) as zip:
-              if not os.path.isdir(arch):
-                  print(f"unzipping from {zip_name}", flush=True)
-                  zip.extractall(arch)
-
-          print("done", flush=True)
+          
+          # Extract the correct architecture file from the WSA package
+          if zip_name:
+              with zipfile.ZipFile(zip_name) as zip:
+                  if not os.path.isdir(arch):
+                      print(f"Unzipping from {zip_name}", flush=True)
+                      zip.extractall(arch)
+          
+          print("Done", flush=True)
       - name: Download Magisk
         shell: python
         run: |
