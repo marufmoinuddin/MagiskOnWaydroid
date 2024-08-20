@@ -133,27 +133,48 @@ jobs:
           winetricks msxml6
       - name: Download WSA
         shell: python
-        run: |
+        run: |          
           import requests
           from bs4 import BeautifulSoup
           import re
           import zipfile
           import os
-          import urllib.request
-          import warnings
+          from tqdm import tqdm
           from requests.packages.urllib3.exceptions import InsecureRequestWarning
+          from requests.adapters import HTTPAdapter
+          from requests.packages.urllib3.util.retry import Retry
           
           # Suppress InsecureRequestWarning
+          import warnings
           warnings.simplefilter('ignore', InsecureRequestWarning)
           
           arch = "x64"
           release_type = "WIS"
           
-          def download_file(url, filename):
-              """Download a file from a URL if it does not already exist."""
-              if not os.path.isfile(filename):
-                  print(f"Downloading link: {url}", flush=True)
-                  urllib.request.urlretrieve(url, filename)
+          def download_file(url, local_filename):
+              """Download a file from a URL with progress bar."""
+              retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504])
+              adapter = HTTPAdapter(max_retries=retries)
+              session = requests.Session()
+              session.mount('http://', adapter)
+              session.mount('https://', adapter)
+          
+              with session.get(url, stream=True) as r:
+                  r.raise_for_status()
+                  total_size = int(r.headers.get('content-length', 0))
+                  with open(local_filename, 'wb') as f, tqdm(
+                      desc=local_filename,
+                      total=total_size,
+                      unit='B',
+                      unit_scale=True,
+                      unit_divisor=1024,
+                      miniters=1,
+                      ascii=True
+                  ) as bar:
+                      for chunk in r.iter_content(chunk_size=1024):
+                          if chunk:
+                              f.write(chunk)
+                              bar.update(len(chunk))
           
           # Fetch download links from the API
           try:
@@ -232,7 +253,6 @@ jobs:
                   exit(1)
           
           print("Done", flush=True)
-
 
       - name: Download Magisk
         shell: python
@@ -340,47 +360,85 @@ jobs:
       - name : Download Waydroid System and Vendor images
         shell : python
         run : |
-            import os
-            import requests
-            import json
-            
-            # Map matrix.arch to the correct architecture suffix
-            arch_suffix = ""
-            arch = "${{ matrix.arch }}"
-            if arch == "x64":
-                arch_suffix = "x86_64"
-            elif arch == "arm64":
-                arch_suffix = "arm64"
-            else:
-                print("Unsupported architecture:", matrix_arch)
-                exit(1)
-            
-            # Fetch and process JSON data for vendor
-            vendor_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_{arch_suffix}/HALIUM_11.json"
-            vendor_json_response = requests.get(vendor_json_url)
-            vendor_json = json.loads(vendor_json_response.text)
-            latest_vendor_url = next((item["url"] for item in vendor_json["response"] if item["romtype"] == "HALIUM_11" and "vendor" in item["filename"]), None)
-            
-            # Fetch and process JSON data for system
-            system_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_{arch_suffix}/VANILLA.json"
-            system_json_response = requests.get(system_json_url)
-            system_json = json.loads(system_json_response.text)
-            latest_system_url = next((item["url"] for item in system_json["response"] if item["romtype"] == "VANILLA" and "system" in item["filename"]), None)
-            
-            # Download the latest system and vendor files
-            os.system(f"wget -q {latest_system_url} -O system.zip")
-            os.system(f"wget -q {latest_vendor_url} -O vendor.zip")
-            
+          import requests
+          from tqdm import tqdm
+          
+          def download_file(url, filename):
+              """Download a file from a URL with a progress bar."""
+              with requests.get(url, stream=True) as r:
+                  r.raise_for_status()
+                  total_size = int(r.headers.get('content-length', 0))
+                  with open(filename, 'wb') as f, tqdm(
+                      desc=filename,
+                      total=total_size,
+                      unit='B',
+                      unit_scale=True,
+                      unit_divisor=1024,
+                      miniters=1,
+                      ascii=True
+                  ) as bar:
+                      for chunk in r.iter_content(chunk_size=1024):
+                          if chunk:
+                              f.write(chunk)
+                              bar.update(len(chunk))
+          
+          # Map matrix.arch to the correct architecture suffix
+          arch_suffix = ""
+          arch = "${{ matrix.arch }}"
+          if arch == "x64":
+              arch_suffix = "x86_64"
+          elif arch == "arm64":
+              arch_suffix = "arm64"
+          else:
+              print("Unsupported architecture:", arch)
+              exit(1)
+          
+          # Fetch and process JSON data for vendor
+          vendor_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_{arch_suffix}/HALIUM_11.json"
+          vendor_json_response = requests.get(vendor_json_url)
+          vendor_json_response.raise_for_status()  # Check for request errors
+          vendor_json = vendor_json_response.json()
+          latest_vendor_url = next(
+              (item["url"] for item in vendor_json["response"]
+              if item["romtype"] == "HALIUM_11" and "vendor" in item["filename"]),
+              None
+          )
+          
+          # Fetch and process JSON data for system
+          system_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_{arch_suffix}/VANILLA.json"
+          system_json_response = requests.get(system_json_url)
+          system_json_response.raise_for_status()  # Check for request errors
+          system_json = system_json_response.json()
+          latest_system_url = next(
+              (item["url"] for item in system_json["response"]
+              if item["romtype"] == "VANILLA" and "system" in item["filename"]),
+              None
+          )
+          
+          # Download the latest system and vendor files
+          if latest_system_url:
+              print(f"Downloading system file from: {latest_system_url}", flush=True)
+              download_file(latest_system_url, "system.zip")
+          else:
+              print("No system file found")
+              exit(1)
+          
+          if latest_vendor_url:
+              print(f"Downloading vendor file from: {latest_vendor_url}", flush=True)
+              download_file(latest_vendor_url, "vendor.zip")
+          else:
+              print("No vendor file found")
+              exit(1)
+              
       - name: Replace system and vendor for architecture
         run: |                 
           # Remove old images
           rm -rf ${{ matrix.arch }}/system.img ${{ matrix.arch }}/vendor.img
           
-          # Download and extract the latest system and vendor files
-          wget -q "$LATEST_SYSTEM_URL" -O system.zip
-          wget -q "$LATEST_VENDOR_URL" -O vendor.zip
+          # Extract the latest system and vendor file
           7z x system.zip -o${{ matrix.arch }}/
           7z x vendor.zip -o${{ matrix.arch }}/
+          
       - name: Extract GApps and expand images
         if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}        
         run: |
