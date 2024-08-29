@@ -437,119 +437,122 @@ jobs:
                 extract_as(zip, f"lib/{ abi_map['x64'][0] }/libmagiskinit.so", "magiskpolicy", ".")
               extract_as(zip, f"assets/boot_patch.sh", "boot_patch.sh", "magisk")
               extract_as(zip, f"assets/util_functions.sh", "util_functions.sh", "magisk")
-      - name: Download OpenGApps
-        if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}
-        shell: python
-        run: |
-          import requests
-          import zipfile
-          import os
-          import urllib.request
-          import json
-          import re
+      # - name: Download OpenGApps
+      #   if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}
+      #   shell: python
+      #   run: |
+      #     import requests
+      #     import zipfile
+      #     import os
+      #     import urllib.request
+      #     import json
+      #     import re
 
-          arch = "${{ matrix.arch }}"
-          variant = "${{ matrix.gapps_variant }}"
-          abi_map = {"x64" : "x86_64", "arm64": "arm64"}
-          try:
-              res = requests.get(f"https://api.opengapps.org/list")
-              j = json.loads(res.content)
-              link = {i["name"]: i for i in j["archs"][abi_map[arch]]["apis"]["11.0"]["variants"]}[variant]["zip"]
-          except Exception:
-              print("Failed to fetch from opengapps api, fallbacking to sourceforge rss...")
-              res = requests.get(f'https://sourceforge.net/projects/opengapps/rss?path=/{abi_map[arch]}&limit=100')
-              link = re.search(f'https://.*{abi_map[arch]}/.*{variant}.*\.zip/download', res.text).group().replace('.zip/download', '.zip').replace('sourceforge.net/projects/opengapps/files', 'downloads.sourceforge.net/project/opengapps')
+      #     arch = "${{ matrix.arch }}"
+      #     variant = "${{ matrix.gapps_variant }}"
+      #     abi_map = {"x64" : "x86_64", "arm64": "arm64"}
+      #     try:
+      #         res = requests.get(f"https://api.opengapps.org/list")
+      #         j = json.loads(res.content)
+      #         link = {i["name"]: i for i in j["archs"][abi_map[arch]]["apis"]["11.0"]["variants"]}[variant]["zip"]
+      #     except Exception:
+      #         print("Failed to fetch from opengapps api, fallbacking to sourceforge rss...")
+      #         res = requests.get(f'https://sourceforge.net/projects/opengapps/rss?path=/{abi_map[arch]}&limit=100')
+      #         link = re.search(f'https://.*{abi_map[arch]}/.*{variant}.*\.zip/download', res.text).group().replace('.zip/download', '.zip').replace('sourceforge.net/projects/opengapps/files', 'downloads.sourceforge.net/project/opengapps')
 
-          print(f"downloading link: {link}", flush=True)
+      #     print(f"downloading link: {link}", flush=True)
 
-          out_file = "gapps.zip"
+      #     out_file = "gapps.zip"
 
-          if not os.path.isfile(out_file):
-              urllib.request.urlretrieve(link, out_file)
-          print("done", flush=True)
+      #     if not os.path.isfile(out_file):
+      #         urllib.request.urlretrieve(link, out_file)
+      #     print("done", flush=True)
 
-      - name : Download Waydroid System and Vendor images
-        shell : python
-        run : |
-          import requests
-          from tqdm import tqdm
+      # - name : Download Waydroid System and Vendor images
+      #   shell : python
+      #   run : |
+      #     import requests
+      #     from tqdm import tqdm
           
-          def download_file(url, filename):
-              """Download a file from a URL with a progress bar."""
-              with requests.get(url, stream=True) as r:
-                  r.raise_for_status()
-                  total_size = int(r.headers.get('content-length', 0))
-                  with open(filename, 'wb') as f, tqdm(
-                      desc=filename,
-                      total=total_size,
-                      unit='B',
-                      unit_scale=True,
-                      unit_divisor=1024,
-                      miniters=1,
-                      ascii=True
-                  ) as bar:
-                      for chunk in r.iter_content(chunk_size=1024):
-                          if chunk:
-                              f.write(chunk)
-                              bar.update(len(chunk))
+      #     def download_file(url, filename):
+      #         """Download a file from a URL with a progress bar."""
+      #         with requests.get(url, stream=True) as r:
+      #             r.raise_for_status()
+      #             total_size = int(r.headers.get('content-length', 0))
+      #             with open(filename, 'wb') as f, tqdm(
+      #                 desc=filename,
+      #                 total=total_size,
+      #                 unit='B',
+      #                 unit_scale=True,
+      #                 unit_divisor=1024,
+      #                 miniters=1,
+      #                 ascii=True
+      #             ) as bar:
+      #                 for chunk in r.iter_content(chunk_size=1024):
+      #                     if chunk:
+      #                         f.write(chunk)
+      #                         bar.update(len(chunk))
           
-          # Map matrix.arch to the correct architecture suffix
-          arch_suffix = ""
-          arch = "${{ matrix.arch }}"
-          if arch == "x64":
-              arch_suffix = "x86_64"
-          elif arch == "arm64":
-              arch_suffix = "arm64"
-          else:
-              print("Unsupported architecture:", arch)
-              exit(1)
+      #     # Map matrix.arch to the correct architecture suffix
+      #     arch_suffix = ""
+      #     arch = "${{ matrix.arch }}"
+      #     if arch == "x64":
+      #         arch_suffix = "x86_64"
+      #     elif arch == "arm64":
+      #         arch_suffix = "arm64"
+      #     else:
+      #         print("Unsupported architecture:", arch)
+      #         exit(1)
           
-          # Fetch and process JSON data for vendor
-          vendor_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_{arch_suffix}/HALIUM_11.json"
-          vendor_json_response = requests.get(vendor_json_url)
-          vendor_json_response.raise_for_status()  # Check for request errors
-          vendor_json = vendor_json_response.json()
-          latest_vendor_url = next(
-              (item["url"] for item in vendor_json["response"]
-              if item["romtype"] == "HALIUM_11" and "vendor" in item["filename"]),
-              None
-          )
+      #     # Fetch and process JSON data for vendor
+      #     vendor_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/vendor/waydroid_{arch_suffix}/HALIUM_11.json"
+      #     vendor_json_response = requests.get(vendor_json_url)
+      #     vendor_json_response.raise_for_status()  # Check for request errors
+      #     vendor_json = vendor_json_response.json()
+      #     latest_vendor_url = next(
+      #         (item["url"] for item in vendor_json["response"]
+      #         if item["romtype"] == "HALIUM_11" and "vendor" in item["filename"]),
+      #         None
+      #     )
           
-          # Fetch and process JSON data for system
-          system_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_{arch_suffix}/VANILLA.json"
-          system_json_response = requests.get(system_json_url)
-          system_json_response.raise_for_status()  # Check for request errors
-          system_json = system_json_response.json()
-          latest_system_url = next(
-              (item["url"] for item in system_json["response"]
-              if item["romtype"] == "VANILLA" and "system" in item["filename"]),
-              None
-          )
+      #     # Fetch and process JSON data for system
+      #     system_json_url = f"https://raw.githubusercontent.com/waydroid/OTA/master/system/lineage/waydroid_{arch_suffix}/VANILLA.json"
+      #     system_json_response = requests.get(system_json_url)
+      #     system_json_response.raise_for_status()  # Check for request errors
+      #     system_json = system_json_response.json()
+      #     latest_system_url = next(
+      #         (item["url"] for item in system_json["response"]
+      #         if item["romtype"] == "VANILLA" and "system" in item["filename"]),
+      #         None
+      #     )
           
-          # Download the latest system and vendor files
-          if latest_system_url:
-              print(f"Downloading system file from: {latest_system_url}", flush=True)
-              download_file(latest_system_url, "system.zip")
-          else:
-              print("No system file found")
-              exit(1)
+      #     # Download the latest system and vendor files
+      #     if latest_system_url:
+      #         print(f"Downloading system file from: {latest_system_url}", flush=True)
+      #         download_file(latest_system_url, "system.zip")
+      #     else:
+      #         print("No system file found")
+      #         exit(1)
           
-          if latest_vendor_url:
-              print(f"Downloading vendor file from: {latest_vendor_url}", flush=True)
-              download_file(latest_vendor_url, "vendor.zip")
-          else:
-              print("No vendor file found")
-              exit(1)
+      #     if latest_vendor_url:
+      #         print(f"Downloading vendor file from: {latest_vendor_url}", flush=True)
+      #         download_file(latest_vendor_url, "vendor.zip")
+      #     else:
+      #         print("No vendor file found")
+      #         exit(1)
               
       - name: Replace system and vendor for architecture
         run: |                 
           # Remove old images
-          rm -rf ${{ matrix.arch }}/system.img ${{ matrix.arch }}/vendor.img
-          
-          # Extract the latest system and vendor file
-          7z x system.zip -o${{ matrix.arch }}/
-          7z x vendor.zip -o${{ matrix.arch }}/
-          
+          # rm -rf ${{ matrix.arch }}/system.img ${{ matrix.arch }}/vendor.img
+
+          # # Extract the latest system and vendor file
+          # 7z x system.zip -o${{ matrix.arch }}/
+          # 7z x vendor.zip -o${{ matrix.arch }}/
+          #A13
+          wget -O system.img "https://www.dropbox.com/scl/fi/zt3ywg1g7wglv12hvq7g0/system.img?rlkey=19i8s2xn32agaw55v6qe0rxus&st=hidirtuk&dl=1"
+          wget -O vendor.img "https://www.dropbox.com/scl/fi/nhfj354gcyhakdmryovk2/vendor.img?rlkey=n5z07zknpyho2le2svhayhrup&st=zd6cim13&dl=1"
+                    
       - name: Extract GApps and expand images
         if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}        
         run: |
