@@ -553,13 +553,13 @@ jobs:
           wget -O system.img "https://www.dropbox.com/scl/fi/zt3ywg1g7wglv12hvq7g0/system.img?rlkey=19i8s2xn32agaw55v6qe0rxus&st=hidirtuk&dl=1"
           wget -O vendor.img "https://www.dropbox.com/scl/fi/nhfj354gcyhakdmryovk2/vendor.img?rlkey=n5z07zknpyho2le2svhayhrup&st=zd6cim13&dl=1"
                     
-      - name: Extract GApps and expand images
-        if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}        
-        run: |
-          mkdir gapps
-          unzip -p gapps.zip {Core,GApps}/'*.lz' | tar --lzip -C gapps -xvf - -i --strip-components=2 --exclude='setupwizardtablet-x86_64' --exclude='packageinstallergoogle-all' --exclude='speech-common' --exclude='markup-lib-arm' --exclude='markup-lib-arm64' --exclude='markup-all' --exclude='setupwizarddefault-x86_64' --exclude='pixellauncher-all' --exclude='pixellauncher-common'
-          e2fsck -yf ${{ matrix.arch }}/system.img
-          resize2fs ${{ matrix.arch }}/system.img $(( $(du -sB512 gapps | cut -f1) + $(du -sB512 ${{ matrix.arch }}/system.img | cut -f1) ))s
+      # - name: Extract GApps and expand images
+      #   if: ${{ matrix.gapps_variant != 'none' && matrix.gapps_variant != '' }}        
+      #   run: |
+      #     mkdir gapps
+      #     unzip -p gapps.zip {Core,GApps}/'*.lz' | tar --lzip -C gapps -xvf - -i --strip-components=2 --exclude='setupwizardtablet-x86_64' --exclude='packageinstallergoogle-all' --exclude='speech-common' --exclude='markup-lib-arm' --exclude='markup-lib-arm64' --exclude='markup-all' --exclude='setupwizarddefault-x86_64' --exclude='pixellauncher-all' --exclude='pixellauncher-common'
+      #     e2fsck -yf ${{ matrix.arch }}/system.img
+      #     resize2fs ${{ matrix.arch }}/system.img $(( $(du -sB512 gapps | cut -f1) + $(du -sB512 ${{ matrix.arch }}/system.img | cut -f1) ))s
       - name: Expand vendor
         run: |
           e2fsck -yf ${{ matrix.arch }}/vendor.img
