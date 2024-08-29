@@ -550,7 +550,7 @@ jobs:
           # 7z x system.zip -o${{ matrix.arch }}/
           # 7z x vendor.zip -o${{ matrix.arch }}/
           #A13
-          mkdir x64
+          mkdir -p x64
           wget -O x64/system.img "https://www.dropbox.com/scl/fi/zt3ywg1g7wglv12hvq7g0/system.img?rlkey=19i8s2xn32agaw55v6qe0rxus&st=hidirtuk&dl=1"
           wget -O x64/vendor.img "https://www.dropbox.com/scl/fi/nhfj354gcyhakdmryovk2/vendor.img?rlkey=n5z07zknpyho2le2svhayhrup&st=zd6cim13&dl=1"
                     
